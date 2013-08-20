@@ -64,7 +64,12 @@ module PlasticCup
     # teacup/lib/teacup/handler.rb
     def self.apply_properties(target, properties)
       klass = target.class
-      properties.each do |key, value|
+      properties.each do |key, proxy_value|
+        value = if proxy_value.is_a?(Proc)
+                  proxy_value.call
+                else
+                  proxy_value
+                end
         handled = false
         klass.ancestors.each do |ancestor|
           ancestor_name=ancestor.name
