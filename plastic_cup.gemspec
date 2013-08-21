@@ -7,6 +7,7 @@ Gem::Specification.new do |gem|
   gem.licenses      = ['BSD']
 
   gem.authors  = ['April Tsang']
+  gem.email = ['april@tofugear.com']
 
   gem.description = <<-DESC
 Plastic Cup is a simplified version of Teacup, aiming at memory leak prevention.
