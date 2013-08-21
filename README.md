@@ -33,6 +33,14 @@ PlasticCup::Base.add_style_sheet(:green_button, {
 @button = PlasticCup::Base.style(UIButton.new, :green_button)
 ```
 
+If you define stylesheet outside methods, some values (e.g. UIFont) need to be in Proc form:
+```ruby
+PlasticCup::Base.add_style_sheet(:login_title, {
+    text: 'Login',
+    font: lambda {UIFont.systemFontOfSize(28)}
+})
+```
+
 #### Important: Don't add handler inside any instance method
 
 Will leak:

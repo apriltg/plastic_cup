@@ -114,6 +114,13 @@ describe 'PlasticCup::Base' do
       cell.textLabel.text.should == 'Cell Text'
       cell.textLabel.numberOfLines.should == 3
     end
+
+    it 'should apply Proc value' do
+      label = UILabel.new
+      PlasticCup::Base.apply_properties(label, {font: lambda {UIFont.systemFontOfSize(77)}, textColor: UIColor.grayColor})
+      label.font.should == UIFont.systemFontOfSize(77)
+      label.textColor.should == UIColor.grayColor
+    end
   end
 
   # TODO: add tests for string to symbol conversion
