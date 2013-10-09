@@ -2,6 +2,8 @@ module PlasticCup
 
   class Base
 
+    OSVersions = %w(all ios4 ios5 ios6 ios7)
+
     def self.style(target, style)
       if style.is_a?(Hash)
         apply_properties(target, style)
@@ -20,12 +22,21 @@ module PlasticCup
       target
     end
 
-    def self.add_style_sheet(name, properties)
-      styles[to_key(name)] = Stylesheet.new(properties)
+    def self.add_style_sheet(name, properties, os_version=:all)
+      if OSVersions.include?(os_version.to_s)
+        styles[to_key(name)] ||= {}
+        styles[to_key(name)][os_version.to_sym] = Stylesheet.new(properties)
+      else
+        raise ArgumentError.new "OS version only accept #{OSVersions}"
+      end
     end
 
     def self.get_style_sheet(style)
-      style_hash = styles[to_key(style)]
+      version_string = UIDevice.currentDevice.systemVersion.split('.').first
+      if styles[to_key(style)].is_a?(Hash)
+        style_hash = styles[to_key(style)]["ios#{version_string}".to_sym]
+        style_hash ||= styles[to_key(style)][:all]
+      end
       NSLog "WARNING: Style #{style} undefined." if style_hash.nil?
       style_hash
     end

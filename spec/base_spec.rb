@@ -87,6 +87,39 @@ describe 'PlasticCup::Base' do
       style_sheet.properties.should == {text: 'My Text', textAlignment: 1}
       style_sheet.extends.should == [:mother, :father]
     end
+
+    describe 'os version' do
+      after do
+        UIDevice.currentDevice.reset(:systemVersion)
+      end
+
+      it 'should add style sheet with specific os version' do
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iOS 7 text'}, :ios7)
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iOS 6 text'}, :ios6)
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'other iOS text'})
+
+        UIDevice.currentDevice.stub!(:systemVersion, return: '6.1')
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style)
+        style_sheet.properties.should == {text: 'iOS 6 text'}
+
+        UIDevice.currentDevice.stub!(:systemVersion, return: '7.0')
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style)
+        style_sheet.properties.should == {text: 'iOS 7 text'}
+
+        UIDevice.currentDevice.stub!(:systemVersion, return: '5.0')
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style)
+        style_sheet.properties.should == {text: 'other iOS text'}
+
+      end
+
+      it 'add style sheet should raise error if os version not supported' do
+        lambda {
+          PlasticCup::Base.add_style_sheet(:my_style, {text: ''}, :ios1)
+        }.
+            should.raise(ArgumentError).
+            message.should.match(/OS version only accept /)
+      end
+    end
   end
 
   describe '#handler' do

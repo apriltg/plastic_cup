@@ -1,16 +1,18 @@
 PATH
   remote: .
   specs:
-    plastic_cup (0.0.2)
+    plastic_cup (0.1.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    motion-stump (0.3.0)
     rake (10.1.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  motion-stump
   plastic_cup!
   rake

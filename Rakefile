@@ -8,6 +8,7 @@ else
 end
 require 'bundler'
 Bundler.require
+require 'motion-stump'
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.

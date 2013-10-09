@@ -33,6 +33,19 @@ PlasticCup::Base.add_style_sheet(:green_button, {
 @button = PlasticCup::Base.style(UIButton.new, :green_button)
 ```
 
+Support different iOS versions
+```ruby
+PlasticCup::Base.add_style_sheet(:bg_view, {
+  frame: CGRectMake(0, 0, 320, 200)
+}, :all)
+
+PlasticCup::Base.add_style_sheet(:bg_view, {
+  frame: CGRectMake(0, 20, 320, 200)
+}, :ios7)
+# supported symbols: :all, :ios4, :ios5, :ios6, :ios7
+# default is :all
+```
+
 If you define stylesheet outside methods, some values (e.g. UIFont) need to be in Proc form:
 ```ruby
 PlasticCup::Base.add_style_sheet(:login_title, {
