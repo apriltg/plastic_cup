@@ -49,6 +49,30 @@ describe 'PlasticCup::Base' do
       button.tintColor.should == UIColor.greenColor
     end
 
+    it 'should support multiple layer extends' do
+      PlasticCup::Base.add_style_sheet(:grandma, {textAlignment: 2})
+      PlasticCup::Base.add_style_sheet(:mother, {extends: :grandma, placeholder: 'This is placeholder'})
+      PlasticCup::Base.add_style_sheet(:my_style, {extends: :mother, text: 'My Text'})
+
+      field = PlasticCup::Base.style(UITextField.new, :my_style)
+
+      field.textAlignment.should == 2
+      field.text.should == 'My Text'
+      field.placeholder.should == 'This is placeholder'
+    end
+
+    it 'should ignore missing extends style sheet' do
+      PlasticCup::Base.add_style_sheet(:grandma, {textAlignment: 3})
+      PlasticCup::Base.add_style_sheet(:mother, {extends: [:grandma, :nobody], placeholder: 'Mother placeholder'})
+      PlasticCup::Base.add_style_sheet(:my_style, {extends: [:mother, :et], text: 'My Style Text'})
+
+      field = PlasticCup::Base.style(UITextField.new, :my_style)
+
+      field.textAlignment.should == 3
+      field.text.should == 'My Style Text'
+      field.placeholder.should == 'Mother placeholder'
+    end
+
   end
 
   describe '#add_style_sheet and #get_style_sheet' do

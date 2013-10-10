@@ -8,16 +8,7 @@ module PlasticCup
       if style.is_a?(Hash)
         apply_properties(target, style)
       else
-        style_sheet = get_style_sheet(style)
-        unless style_sheet.nil?
-          extends = style_sheet.extends
-          final_style = {}
-          extends.each do |ext|
-            ext_style_sheet = get_style_sheet(ext)
-            final_style.merge!(ext_style_sheet.properties) unless ext_style_sheet.nil?
-          end
-          apply_properties(target, final_style.merge(style_sheet.properties))
-        end
+        apply_properties(target, get_style_sheet_properties(style))
       end
       target
     end
@@ -39,6 +30,24 @@ module PlasticCup
       end
       NSLog "WARNING: Style #{style} undefined." if style_hash.nil?
       style_hash
+    end
+
+    def self.get_style_sheet_properties(style)
+      style_sheet = get_style_sheet(style)
+      if style_sheet.nil?
+        {}
+      else
+        extends = style_sheet.extends
+        if extends.empty?
+          style_sheet.properties
+        else
+          final_style = {}
+          extends.each do |ext|
+            final_style.merge!(get_style_sheet_properties(ext))
+          end
+          final_style.merge(style_sheet.properties)
+        end
+      end
     end
 
     # teacup/lib/teacup/handler.rb
