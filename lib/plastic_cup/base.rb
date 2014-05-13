@@ -4,9 +4,11 @@ module PlasticCup
 
     OSVersions = %w(all ios4 ios5 ios6 ios7)
 
-    def self.style(target, style)
+    def self.style(target, style, other_style=nil)
       if style.is_a?(Hash)
         apply_properties(target, style)
+      elsif other_style.is_a?(Hash)
+        apply_properties(target, get_style_sheet_properties(style).merge(other_style))
       else
         apply_properties(target, get_style_sheet_properties(style))
       end

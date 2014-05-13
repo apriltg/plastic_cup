@@ -73,6 +73,24 @@ describe 'PlasticCup::Base' do
       field.placeholder.should == 'Mother placeholder'
     end
 
+    it 'should support additional style' do
+      PlasticCup::Base.add_style_sheet(:my_style, {textAlignment: 3})
+
+      field = PlasticCup::Base.style(UITextField.new, :my_style, text: 'My Style Text')
+
+      field.textAlignment.should == 3
+      field.text.should == 'My Style Text'
+    end
+
+    it 'should support additional style overriding style sheet' do
+      PlasticCup::Base.add_style_sheet(:my_style, {textAlignment: 3, placeholder: 'Mother placeholder'})
+
+      field = PlasticCup::Base.style(UITextField.new, :my_style, text: 'My Style Text', placeholder: 'My placeholder')
+
+      field.textAlignment.should == 3
+      field.text.should == 'My Style Text'
+      field.placeholder.should == 'My placeholder'
+    end
   end
 
   describe '#add_style_sheet and #get_style_sheet' do

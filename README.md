@@ -17,6 +17,7 @@ PlasticCup::Base.add_style_sheet(:red_button, {
   backgroundColor: UIColor.redColor
 })
 @button = PlasticCup::Base.style(UIButton.new, :red_button)
+@button2 = PlasticCup::Base.style(UIButton.new, :red_button, title: 'Another Red')
 ```
 
 Style with extend Stylesheet
