@@ -2,7 +2,7 @@ module PlasticCup
 
   class Base
 
-    OSVersions = %w(all ios4 ios5 ios6 ios7)
+    OSVersions = %w(all ios4 ios5 ios6 ios7 ios8)
 
     def self.style(target, style, other_style=nil)
       if style.is_a?(Hash)
