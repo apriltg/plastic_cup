@@ -7,10 +7,14 @@ module PlasticCup
     def self.style(target, style, other_style=nil)
       if style.is_a?(Hash)
         apply_properties(target, style)
-      elsif other_style.is_a?(Hash)
-        apply_properties(target, get_style_sheet_properties(style).merge(other_style))
       else
-        apply_properties(target, get_style_sheet_properties(style))
+        extends = style.is_a?(Array) ? style : [style]
+        final_style = {}
+        extends.each do |ext|
+          final_style.merge!(get_style_sheet_properties(ext))
+        end
+        final_style.merge!(other_style) if other_style.is_a?(Hash)
+        apply_properties(target, final_style)
       end
       target
     end

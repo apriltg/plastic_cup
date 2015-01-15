@@ -91,6 +91,17 @@ describe 'PlasticCup::Base' do
       field.text.should == 'My Style Text'
       field.placeholder.should == 'My placeholder'
     end
+
+    it 'should support multiple additional styles' do
+      PlasticCup::Base.add_style_sheet(:father, {backgroundColor: UIColor.blueColor, numberOfLines: 18})
+      PlasticCup::Base.add_style_sheet(:mother, {backgroundColor: UIColor.redColor, textColor: UIColor.greenColor})
+      label = PlasticCup::Base.style(UILabel.new, [:father, :mother], text: 'My label', textColor: UIColor.grayColor)
+
+      label.backgroundColor.should == UIColor.redColor
+      label.numberOfLines.should == 18
+      label.textColor.should == UIColor.grayColor
+      label.text.should == 'My label'
+    end
   end
 
   describe '#add_style_sheet and #get_style_sheet' do

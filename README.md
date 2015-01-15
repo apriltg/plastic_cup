@@ -22,16 +22,16 @@ PlasticCup::Base.add_style_sheet(:red_button, {
 
 Style with extend Stylesheet
 ```ruby
-PlasticCup::Base.add_style_sheet(:round_button, {
+PlasticCup::Base.add_style_sheet(:round_label, {
   layer: {
     cornerRadius: 8
   }
 })
-PlasticCup::Base.add_style_sheet(:green_button, {
-  extends: :round_button,
+PlasticCup::Base.add_style_sheet(:green_label, {
+  extends: :round_label,
   backgroundColor: UIColor.greenColor
 }
-@button = PlasticCup::Base.style(UIButton.new, :green_button)
+@label = PlasticCup::Base.style(UILabel.new, :green_label)
 ```
 
 Support different iOS versions
@@ -43,7 +43,7 @@ PlasticCup::Base.add_style_sheet(:bg_view, {
 PlasticCup::Base.add_style_sheet(:bg_view, {
   frame: CGRectMake(0, 20, 320, 200)
 }, :ios7)
-# supported symbols: :all, :ios4, :ios5, :ios6, :ios7
+# supported symbols: :all, :ios4, :ios5, :ios6, :ios7, :ios8
 # default is :all
 ```
 
