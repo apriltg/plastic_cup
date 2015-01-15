@@ -106,7 +106,11 @@ module PlasticCup
           # you can send methods to subviews (e.g. UIButton#titleLabel) and CALayers
           # (e.g. UIView#layer) by assigning a hash to a style name.
           if value.is_a?(Hash)
-            apply_properties(target.send(key), value)
+            if target.respondsToSelector(key) || target.respond_to?(key)
+              apply_properties(target.send(key), value)
+            else
+              NSLog "WARNING: undefined method '#{key}' for #{target.inspect}"
+            end
           else
             if key =~ /^set[A-Z]/
               assign = nil
