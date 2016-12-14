@@ -147,8 +147,8 @@ describe 'PlasticCup::Base' do
       end
 
       it 'should add style sheet with specific os version' do
-        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iOS 7 text'}, :ios7)
-        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iOS 6 text'}, :ios6)
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iOS 7 text'}, os: :ios7)
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iOS 6 text'}, os: :ios6)
         PlasticCup::Base.add_style_sheet(:my_style, {text: 'other iOS text'})
 
         UIDevice.currentDevice.stub!(:systemVersion, return: '6.1')
@@ -167,10 +167,77 @@ describe 'PlasticCup::Base' do
 
       it 'add style sheet should raise error if os version not supported' do
         lambda {
-          PlasticCup::Base.add_style_sheet(:my_style, {text: ''}, :ios1)
+          PlasticCup::Base.add_style_sheet(:my_style, {text: ''}, os: :ios1)
         }.
             should.raise(ArgumentError).
-            message.should.match(/OS version only accept /)
+            message.should.match(/os only accept /)
+      end
+    end
+
+    describe 'inch version' do
+
+      it 'should add style sheet with specific screen inch' do
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iPhone 4 text'}, inch: '3.5')
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iPhone 6 Plus text'}, inch: '5.5')
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'other screen text'})
+
+        screen = PlasticCup::Base.style(UIView.new, frame: CGRectMake(0,0,320,480))
+
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style, screen)
+        style_sheet.properties.should == {text: 'iPhone 4 text'}
+
+        screen = PlasticCup::Base.style(UIView.new, frame: CGRectMake(0,0,414,736))
+
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style, screen)
+        style_sheet.properties.should == {text: 'iPhone 6 Plus text'}
+
+        screen = PlasticCup::Base.style(UIView.new, frame: CGRectMake(0,0,768,1024))
+
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style, screen)
+        style_sheet.properties.should == {text: 'other screen text'}
+      end
+
+      it 'add style sheet should raise error if screen inch not supported' do
+        lambda {
+          PlasticCup::Base.add_style_sheet(:my_style, {text: ''}, inch: '12.9') # ipad not supported yet
+        }.
+            should.raise(ArgumentError).
+            message.should.match(/inch only accept /)
+      end
+    end
+
+    describe 'inch version and os version' do
+      after do
+        UIDevice.currentDevice.reset(:systemVersion)
+      end
+
+      it 'should add style sheet with specific screen inch and os version' do
+
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iPhone 4 iOS 7 text'}, inch: '3.5', os: :ios7)
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iPhone 4 iOS 6 text'}, inch: '3.5', os: :ios6)
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'iPhone 6 Plus text'}, inch: '5.5')
+        PlasticCup::Base.add_style_sheet(:my_style, {text: 'other iOS text'})
+
+        screen = PlasticCup::Base.style(UIView.new, frame: CGRectMake(0,0,320,480))
+
+        UIDevice.currentDevice.stub!(:systemVersion, return: '6.1')
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style, screen)
+        style_sheet.properties.should == {text: 'iPhone 4 iOS 6 text'}
+
+        UIDevice.currentDevice.stub!(:systemVersion, return: '7.0')
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style, screen)
+        style_sheet.properties.should == {text: 'iPhone 4 iOS 7 text'}
+
+        screen = PlasticCup::Base.style(UIView.new, frame: CGRectMake(0,0,414,736))
+
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style, screen)
+        style_sheet.properties.should == {text: 'iPhone 6 Plus text'}
+
+        screen = PlasticCup::Base.style(UIView.new, frame: CGRectMake(0,0,768,1024))
+
+        UIDevice.currentDevice.stub!(:systemVersion, return: '5.0')
+        style_sheet = PlasticCup::Base.get_style_sheet(:my_style, screen)
+        style_sheet.properties.should == {text: 'other iOS text'}
       end
     end
   end

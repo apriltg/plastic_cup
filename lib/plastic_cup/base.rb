@@ -2,16 +2,17 @@ module PlasticCup
 
   class Base
 
-    OSVersions = %w(all ios4 ios5 ios6 ios7 ios8 ios9 ios10)
+    OS_VERSIONS = %w(any ios4 ios5 ios6 ios7 ios8 ios9 ios10)
+    DISPLAY_INCHES = %w(any 3.5 4 4.7 5.5)
 
-    def self.style(target, style, other_style=nil)
+    def self.style(target, style, other_style=nil, screen=nil)
       if style.is_a?(Hash)
         apply_properties(target, style)
       else
         extends = style.is_a?(Array) ? style : [style]
         final_style = {}
         extends.each do |ext|
-          final_style.merge!(get_style_sheet_properties(ext))
+          final_style.merge!(get_style_sheet_properties(ext, screen))
         end
         final_style.merge!(other_style) if other_style.is_a?(Hash)
         apply_properties(target, final_style)
@@ -19,27 +20,48 @@ module PlasticCup
       target
     end
 
-    def self.add_style_sheet(name, properties, os_version=:all)
-      if OSVersions.include?(os_version.to_s)
-        styles[to_key(name)] ||= {}
-        styles[to_key(name)][os_version.to_sym] = Stylesheet.new(properties)
+    # device_options={inch: '4.7', os: 'ios10'}
+    def self.add_style_sheet(name, properties, device_options={})
+      device_options ||= {}
+      if device_options == :all # backward compatible
+        os = :any
+        inch = :any
       else
-        raise ArgumentError.new "OS version only accept #{OSVersions}"
+        os = device_options[:os]
+        os = :any if os.nil?
+        inch = device_options[:inch] || :any
       end
+      unless OS_VERSIONS.include?(os.to_s)
+        raise ArgumentError.new "os only accept #{OS_VERSIONS}"
+      end
+      unless DISPLAY_INCHES.include?(inch.to_s)
+        raise ArgumentError.new "inch only accept #{DISPLAY_INCHES}"
+      end
+
+      styles[to_key(name)] ||= {}
+      styles[to_key(name)][version_key(inch, os)] = Stylesheet.new(properties)
     end
 
-    def self.get_style_sheet(style)
-      version_string = UIDevice.currentDevice.systemVersion.split('.').first
-      if styles[to_key(style)].is_a?(Hash)
-        style_hash = styles[to_key(style)]["ios#{version_string}".to_sym]
-        style_hash ||= styles[to_key(style)][:all]
+    def self.get_style_sheet(style, screen=nil)
+      style_key = to_key(style)
+      if styles[style_key].is_a?(Hash)
+        style_hash = nil
+        get_version_keys(screen).each do |key|
+          style_hash = styles[style_key][key]
+          break if style_hash
+          # TODO: support merge style sheets with different versions
+          # hash = styles[style_key][key]
+          # if hash
+          #   style_hash = hash.merge(style_hash||{})
+          # end
+        end
       end
       NSLog "WARNING: Style #{style} undefined." if style_hash.nil?
       style_hash
     end
 
-    def self.get_style_sheet_properties(style)
-      style_sheet = get_style_sheet(style)
+    def self.get_style_sheet_properties(style, screen=nil)
+      style_sheet = get_style_sheet(style, screen)
       if style_sheet.nil?
         {}
       else
@@ -49,7 +71,7 @@ module PlasticCup
         else
           final_style = {}
           extends.each do |ext|
-            final_style.merge!(get_style_sheet_properties(ext))
+            final_style.merge!(get_style_sheet_properties(ext, screen))
           end
           final_style.merge(style_sheet.properties)
         end
@@ -75,6 +97,44 @@ module PlasticCup
         raise TypeError.new "#{key.inspect} is not a symbol"
       end
     end
+
+    def self.get_inch(screen=nil)
+      screen ||= UIScreen.mainScreen
+      height = screen.bounds.size.height
+      case height
+        when 480
+          '3.5'
+        when 568
+          '4'
+        when 667
+          '4.7'
+        when 736
+          '5.5'
+          # TODO: handle landscape, ipad, and split screen
+        # when 1024
+        #   '9.7'
+        # when 1336
+        #   '12.9'
+        else
+          'any'
+      end
+    end
+
+    def self.get_os(version=UIDevice.currentDevice.systemVersion)
+      "ios#{version.split('.').first}"
+    end
+
+    def self.get_version_keys(screen=nil)
+      inch_array = [get_inch(screen), 'any']
+      os_array = [get_os, 'any']
+      inch_array.map{|inch| os_array.map{|os| version_key(inch, os)}}.flatten
+    end
+
+    def self.version_key(inch, os)
+      "#{inch}|#{os}".to_sym
+    end
+
+
 
     def self.styles
       @styles||={}
