@@ -26,6 +26,9 @@ module PlasticCup
       if device_options == :all # backward compatible
         os = :any
         inch = :any
+      elsif !device_options.is_a?(Hash)
+        os = device_options
+        inch = :any
       else
         os = device_options[:os]
         os = :any if os.nil?
@@ -78,6 +81,20 @@ module PlasticCup
       end
     end
 
+    def self.get_property(style, name, screen=nil)
+      get_style_sheet_properties(style, screen)[name]
+    end
+
+    def self.get_style_sheet_ignored_properties(style, screen=nil)
+      hash = get_style_sheet_properties(style, screen)
+      hash = hash.select{|k,v| k[0] == ignore_symbol}
+      hash.each_with_object({}) do |pair, h|
+        k = pair[0][1..-1].to_sym
+        h[k] = pair[1]
+      end
+
+    end
+
     # teacup/lib/teacup/handler.rb
     def self.handler(klass, *style_names, &block)
       if style_names.length == 0
@@ -99,8 +116,7 @@ module PlasticCup
     end
 
     def self.get_inch(screen=nil)
-      screen ||= UIScreen.mainScreen
-      height = screen.bounds.size.height
+      height = get_screen_height(screen)
       case height
         when 480
           '3.5'
@@ -134,7 +150,19 @@ module PlasticCup
       "#{inch}|#{os}".to_sym
     end
 
+    def self.get_screen_height(screen=nil)
+      screen ||= UIScreen.mainScreen
+      screen.bounds.size.height
+    end
 
+    def self.get_screen_width(screen=nil)
+      screen ||= UIScreen.mainScreen
+      screen.bounds.size.width
+    end
+
+    def self.ignore_symbol
+      '_'
+    end
 
     def self.styles
       @styles||={}
@@ -151,6 +179,7 @@ module PlasticCup
     def self.apply_properties(target, properties)
       klass = target.class
       properties.each do |key, proxy_value|
+        next if key[0] == ignore_symbol # ignore keys start with that character
         value = if proxy_value.is_a?(Proc)
                   proxy_value.call
                 else
